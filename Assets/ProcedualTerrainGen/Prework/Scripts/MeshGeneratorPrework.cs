@@ -56,11 +56,11 @@ namespace ProcedualTerrainGen.Prework
 
         private void OnDrawGizmos()
         {
-            Gizmos.color = Color.yellow;
-            foreach(var v in GetComponent<MeshFilter>().sharedMesh.vertices)
-            {
-                Gizmos.DrawSphere(v, 0.1f);
-            }
+//            Gizmos.color = Color.yellow;
+//            foreach(var v in GetComponent<MeshFilter>().sharedMesh.vertices)
+//            {
+//                Gizmos.DrawSphere(v, 0.1f);
+//            }
         }
     }
 }
