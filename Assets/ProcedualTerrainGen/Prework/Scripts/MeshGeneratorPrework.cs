@@ -20,7 +20,10 @@ namespace ProcedualTerrainGen.Prework
             {
                 for (var j = 0; j <= xSize; j++)
                 {
-                    vertices.Add(new Vector3(i- (zSize/2f), 0, j-(xSize/2f)));
+                    var _x = i - (zSize / 2f);
+                    var _z = j - (xSize / 2f);
+                    var _y = Mathf.PerlinNoise(_x + 12.5f, _z + 5.2f);
+                    vertices.Add(new Vector3(_x, _y, _z));
                 }
             }
             mesh.SetVertices(vertices);
