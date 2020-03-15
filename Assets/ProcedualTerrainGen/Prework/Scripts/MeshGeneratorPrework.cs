@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace ProcedualTerrainGen.Prework
@@ -14,17 +15,27 @@ namespace ProcedualTerrainGen.Prework
         {
             Mesh mesh = new Mesh();
 
-            Vector3[] vecs = new Vector3[(xSize + 1) * (zSize + 1)];
-            for(var i=0; i<=zSize; i++)
+//            Vector3[] vecs = new Vector3[(xSize + 1) * (zSize + 1)];
+//            for(var i=0; i<=zSize; i++)
+//            {
+//                for (var j = 0; j <= xSize; j++)
+//                {
+//                    Vector3 vec = new Vector3(i- (xSize/2f), 0, j-(zSize/2f));
+//                    vecs[i * (xSize + 1) + j] = vec;
+//                }
+//                
+//            }
+//            mesh.vertices = vecs;
+
+            List<Vector3> vertices = new List<Vector3>();
+            for (var i = 0; i < zSize; i++)
             {
-                for (var j = 0; j <= xSize; j++)
+                for (var j = 0; j < xSize; j++)
                 {
-                    Vector3 vec = new Vector3(i- (xSize/2f), 0, j-(zSize/2f));
-                    vecs[i * (xSize + 1) + j] = vec;
+                    vertices.Add(new Vector3(i- (xSize/2f), 0, j-(zSize/2f)));
                 }
-                
             }
-            mesh.vertices = vecs;
+            mesh.SetVertices(vertices);
 
 //            int[] tris = new int[xSize * 6 * zSize];
 //            for (int i = 0; i <= zSize; i++)
