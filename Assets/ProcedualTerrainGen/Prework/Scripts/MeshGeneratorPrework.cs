@@ -14,23 +14,11 @@ namespace ProcedualTerrainGen.Prework
         private void Start()
         {
             Mesh mesh = new Mesh();
-
-//            Vector3[] vecs = new Vector3[(xSize + 1) * (zSize + 1)];
-//            for(var i=0; i<=zSize; i++)
-//            {
-//                for (var j = 0; j <= xSize; j++)
-//                {
-//                    Vector3 vec = new Vector3(i- (xSize/2f), 0, j-(zSize/2f));
-//                    vecs[i * (xSize + 1) + j] = vec;
-//                }
-//                
-//            }
-//            mesh.vertices = vecs;
-
+            
             List<Vector3> vertices = new List<Vector3>();
-            for (var i = 0; i < zSize; i++)
+            for (var i = 0; i <= zSize; i++)
             {
-                for (var j = 0; j < xSize; j++)
+                for (var j = 0; j <= xSize; j++)
                 {
                     vertices.Add(new Vector3(i- (xSize/2f), 0, j-(zSize/2f)));
                 }
@@ -56,14 +44,29 @@ namespace ProcedualTerrainGen.Prework
 //                }
 //            }
 
-            int[] tris = new[]
+//            int[] tris = new[]
+//            {
+//                0, 1, 6,
+//                7,6,1
+//            };
+//            mesh.triangles = tris;
+
+            List<int> triangles = new List<int>();
+            for(int i=0; i<zSize; i++)
+            for (int j = 0; j < xSize; j++)
             {
-                0, 1, 6,
-                7,6,1
-            };
-            mesh.triangles = tris;
+                Func<int, int, int> calcVertexIndex = (_i, _j) => _i * (xSize + 1) + _j;
+                
+                triangles.Add(calcVertexIndex(i, j));
+                triangles.Add(calcVertexIndex(i, j + 1));
+                triangles.Add(calcVertexIndex(i + 1, j));
 
-
+                triangles.Add(calcVertexIndex(i, j + 1));
+                triangles.Add((calcVertexIndex(i + 1, j + 1)));
+                triangles.Add(calcVertexIndex(i+1,j));
+            }
+            mesh.SetTriangles(triangles, 0);
+            
             mesh.RecalculateNormals();
             MeshFilter filter = GetComponent<MeshFilter>();
             
