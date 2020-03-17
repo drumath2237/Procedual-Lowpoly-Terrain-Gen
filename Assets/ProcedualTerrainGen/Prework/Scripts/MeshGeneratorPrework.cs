@@ -15,9 +15,9 @@ namespace ProcedualTerrainGen.Prework
         
         private void Start()
         {
-            Mesh mesh = new Mesh();
+            var mesh = new Mesh();
             
-            List<Vector3> vertices = new List<Vector3>();
+            var vertices = new List<Vector3>();
             for (var i = 0; i <= zSize; i++)
             {
                 for (var j = 0; j <= xSize; j++)
@@ -31,9 +31,9 @@ namespace ProcedualTerrainGen.Prework
             mesh.SetVertices(vertices);
 
 
-            List<int> triangles = new List<int>();
-            for(int i=0; i<zSize; i++)
-            for (int j = 0; j < xSize; j++)
+            var triangles = new List<int>();
+            for(var i=0; i<zSize; i++)
+            for (var j = 0; j < xSize; j++)
             {
                 Func<int, int, int> calcVertexIndex = (_i, _j) => _i * (xSize + 1) + _j;
                 
@@ -48,11 +48,11 @@ namespace ProcedualTerrainGen.Prework
             mesh.SetTriangles(triangles, 0);
             
             mesh.RecalculateNormals();
-            MeshFilter filter = GetComponent<MeshFilter>();
+            var filter = GetComponent<MeshFilter>();
             
             filter.sharedMesh = mesh;
 
-            MeshRenderer renderer = GetComponent<MeshRenderer>();
+            var renderer = GetComponent<MeshRenderer>();
             renderer.material = _mat;
         }
 
