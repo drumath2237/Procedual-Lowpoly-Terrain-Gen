@@ -12,6 +12,11 @@ namespace ProcedualTerrainGen.Prework
         [SerializeField] private Material _mat;
 
         [SerializeField] private int xSize, zSize;
+
+        [SerializeField] private float _geometryScale;
+        [SerializeField] private float _xOffset, _zOffset;
+        
+        
         
         private void Start()
         {
@@ -27,7 +32,7 @@ namespace ProcedualTerrainGen.Prework
         {
             var mesh = new Mesh();
             
-            mesh.SetVertices(CreateVertices());
+            mesh.SetVertices(CreateVertices(_geometryScale, _xOffset, _zOffset));
             mesh.SetTriangles(CreateTriangles(), 0);
             
             mesh.RecalculateNormals();
@@ -39,18 +44,32 @@ namespace ProcedualTerrainGen.Prework
             renderer.material = _mat;
         }
 
-        List<Vector3> CreateVertices()
+        List<Vector3> CreateVertices(float geometryScale, float xOffset, float zOffset)
         {
             var vertices = new List<Vector3>();
             for (var i = 0; i <= zSize; i++)
             {
                 for (var j = 0; j <= xSize; j++)
                 {
-                    var _x = i - (zSize / 2f);
-                    var _z = j - (xSize / 2f);
-                    var _y = Mathf.PerlinNoise(_x + 12.5f, _z + 5.2f);
+
+                    float Noise(float _xvalue, float _zvalue)
+                    {
+                        return Mathf.PerlinNoise(_xvalue, _zvalue) * 2.0f - 1.0f;
+                    }
                     
+                    var _x = (i - (zSize / 2f)) * geometryScale;
+                    var _z = (j - (xSize / 2f)) * geometryScale;
                     
+
+                    var _y =
+                            (
+                            Noise(_x / 100f + xOffset, _z / 100f + zOffset)*50
+                            + Noise(_x/5f+xOffset, _z/5f+zOffset)*3
+                            + Noise(_x+xOffset, _z+zOffset)
+                            )
+                        ;
+
+
                     vertices.Add(new Vector3(_x, _y, _z)*3f);
                 }
             }
