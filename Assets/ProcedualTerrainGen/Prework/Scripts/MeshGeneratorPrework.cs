@@ -4,6 +4,20 @@ using UnityEngine;
 
 namespace ProcedualTerrainGen.Prework
 {
+    enum Biome
+    {
+        Sand,
+        Grass,
+        Rock,
+        Snow
+    }
+
+    internal struct PolygonWithBiome
+    {
+        public List<int> vertices;
+        public Biome biome;
+    }
+    
     [RequireComponent(typeof(MeshRenderer),typeof(MeshFilter))]
     public class MeshGeneratorPrework : MonoBehaviour
     {
@@ -31,17 +45,74 @@ namespace ProcedualTerrainGen.Prework
         void UpdateMesh()
         {
             var mesh = new Mesh();
+
+            var vertices = CreateVertices(_geometryScale, _xOffset, _zOffset);
+            mesh.SetVertices(vertices);
+
+            mesh.subMeshCount = 4;
+
+            var sandMesh = new List<int>();
+            var grassMesh = new List<int>();
+            var rockMesh = new List<int>();
+            var snowMesh = new List<int>();
             
-            mesh.SetVertices(CreateVertices(_geometryScale, _xOffset, _zOffset));
-            mesh.SetTriangles(CreateTriangles(), 0);
-            
+            for(var i=0;i<zSize;i++)
+            for (var j = 0; j < xSize; j++)
+            {
+                var poly = CreateBiomePolygonSide1(i, j, vertices);
+                switch (poly.biome)
+                {
+                    case Biome.Sand:
+                        sandMesh.AddRange(poly.vertices);
+                        break;
+                    case Biome.Grass:
+                        grassMesh.AddRange(poly.vertices);
+                        break;
+                    case Biome.Rock:
+                        rockMesh.AddRange(poly.vertices);
+                        break;
+                    case Biome.Snow:
+                        snowMesh.AddRange(poly.vertices);
+                        break;
+                    default:
+                        break;
+                }
+                
+                poly = CreateBiomePolygonSide2(i, j, vertices);
+                switch (poly.biome)
+                {
+                    case Biome.Sand:
+                        sandMesh.AddRange(poly.vertices);
+                        break;
+                    case Biome.Grass:
+                        grassMesh.AddRange(poly.vertices);
+                        break;
+                    case Biome.Rock:
+                        rockMesh.AddRange(poly.vertices);
+                        break;
+                    case Biome.Snow:
+                        snowMesh.AddRange(poly.vertices);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            mesh.SetTriangles(sandMesh, 0);
+            mesh.SetTriangles(grassMesh, 1);
+            mesh.SetTriangles(rockMesh, 2);
+            mesh.SetTriangles(snowMesh, 3);
+
+
+
             mesh.RecalculateNormals();
+            mesh.RecalculateBounds();
+            mesh.RecalculateTangents();
             var filter = GetComponent<MeshFilter>();
             
             filter.sharedMesh = mesh;
 
             var renderer = GetComponent<MeshRenderer>();
-            renderer.material = _mat;
         }
 
         List<Vector3> CreateVertices(float geometryScale, float xOffset, float zOffset)
@@ -63,9 +134,9 @@ namespace ProcedualTerrainGen.Prework
 
                     var _y =
                             (
-                            Noise(_x / 100f + xOffset, _z / 100f + zOffset)*50
-                            + Noise(_x/5f+xOffset, _z/5f+zOffset)*3
-                            + Noise(_x+xOffset, _z+zOffset)
+                            Noise(_x / 100f + xOffset, _z / 100f + zOffset)*45
+                            + Noise(_x/20f+xOffset, _z/20f+zOffset)*1.5f
+                            + Noise(_x+xOffset, _z+zOffset)*3.5f
                             )
                         ;
 
@@ -97,6 +168,53 @@ namespace ProcedualTerrainGen.Prework
             return triangles;
         }
 
+        Biome JudgeBiome(float height)
+        {
+            if (height < -60f)
+                return Biome.Sand;
+            else if (height < 20)
+                return Biome.Grass;
+            else if (height < 70)
+                return Biome.Rock;
+            else
+                return Biome.Snow;
+        }
+
+        PolygonWithBiome CreateBiomePolygonSide1(int _vertex_index_i, int _vertex_index_j, List<Vector3> vertices)
+        {
+            PolygonWithBiome polygon = new PolygonWithBiome();
+            polygon.vertices = new List<int>();
+            
+            Func<int, int, int> calcVertexIndex = (_i, _j) => _i * (xSize + 1) + _j;
+                
+            polygon.vertices.Add(calcVertexIndex(_vertex_index_i, _vertex_index_j));
+            polygon.vertices.Add(calcVertexIndex(_vertex_index_i, _vertex_index_j + 1));
+            polygon.vertices.Add(calcVertexIndex(_vertex_index_i + 1, _vertex_index_j));
+
+            var averageHeight = ((vertices[polygon.vertices[0]] + vertices[polygon.vertices[1]] +
+                                    vertices[polygon.vertices[2]]) / 3.0f).y;
+            polygon.biome = JudgeBiome(averageHeight);
+
+            return polygon;
+        }
+        PolygonWithBiome CreateBiomePolygonSide2(int _vertex_index_i, int _vertex_index_j, List<Vector3> vertices)
+        {
+            PolygonWithBiome polygon = new PolygonWithBiome();
+            polygon.vertices = new List<int>();
+            
+            Func<int, int, int> calcVertexIndex = (_i, _j) => _i * (xSize + 1) + _j;
+                
+            polygon.vertices.Add(calcVertexIndex(_vertex_index_i, _vertex_index_j + 1));
+            polygon.vertices.Add((calcVertexIndex(_vertex_index_i + 1, _vertex_index_j + 1)));
+            polygon.vertices.Add(calcVertexIndex(_vertex_index_i+1,_vertex_index_j));
+
+            var averageHeight = ((vertices[polygon.vertices[0]] + vertices[polygon.vertices[1]] +
+                                    vertices[polygon.vertices[2]]) / 3.0f).y;
+            polygon.biome = JudgeBiome(averageHeight);
+
+            return polygon;
+        }
+
         private void OnDrawGizmos()
         {
             if (!isDrawGizmo) return;
@@ -104,7 +222,7 @@ namespace ProcedualTerrainGen.Prework
             Gizmos.color = Color.yellow;
             foreach(var v in GetComponent<MeshFilter>().sharedMesh.vertices)
             {
-                Gizmos.DrawSphere(v, 0.1f);
+                Gizmos.DrawSphere(v, 1f);
             }
         }
     }
