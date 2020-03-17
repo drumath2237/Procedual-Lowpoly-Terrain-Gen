@@ -15,6 +15,16 @@ namespace ProcedualTerrainGen.Prework
         
         private void Start()
         {
+            UpdateMesh();
+        }
+
+        private void OnValidate()
+        {
+            UpdateMesh();
+        }
+
+        void UpdateMesh()
+        {
             var mesh = new Mesh();
             
             mesh.SetVertices(CreateVertices());
@@ -39,6 +49,8 @@ namespace ProcedualTerrainGen.Prework
                     var _x = i - (zSize / 2f);
                     var _z = j - (xSize / 2f);
                     var _y = Mathf.PerlinNoise(_x + 12.5f, _z + 5.2f);
+                    
+                    
                     vertices.Add(new Vector3(_x, _y, _z)*3f);
                 }
             }
