@@ -7,6 +7,8 @@ namespace ProcedualTerrainGen.Prework
     [RequireComponent(typeof(MeshRenderer),typeof(MeshFilter))]
     public class MeshGeneratorPrework : MonoBehaviour
     {
+        [SerializeField] private bool isDrawGizmo=false;
+        
         [SerializeField] private Material _mat;
 
         [SerializeField] private int xSize, zSize;
@@ -23,7 +25,7 @@ namespace ProcedualTerrainGen.Prework
                     var _x = i - (zSize / 2f);
                     var _z = j - (xSize / 2f);
                     var _y = Mathf.PerlinNoise(_x + 12.5f, _z + 5.2f);
-                    vertices.Add(new Vector3(_x, _y, _z));
+                    vertices.Add(new Vector3(_x, _y, _z)*3f);
                 }
             }
             mesh.SetVertices(vertices);
@@ -56,11 +58,13 @@ namespace ProcedualTerrainGen.Prework
 
         private void OnDrawGizmos()
         {
-//            Gizmos.color = Color.yellow;
-//            foreach(var v in GetComponent<MeshFilter>().sharedMesh.vertices)
-//            {
-//                Gizmos.DrawSphere(v, 0.1f);
-//            }
+            if (!isDrawGizmo) return;
+            
+            Gizmos.color = Color.yellow;
+            foreach(var v in GetComponent<MeshFilter>().sharedMesh.vertices)
+            {
+                Gizmos.DrawSphere(v, 0.1f);
+            }
         }
     }
 }
