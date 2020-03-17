@@ -17,6 +17,20 @@ namespace ProcedualTerrainGen.Prework
         {
             var mesh = new Mesh();
             
+            mesh.SetVertices(CreateVertices());
+            mesh.SetTriangles(CreateTriangles(), 0);
+            
+            mesh.RecalculateNormals();
+            var filter = GetComponent<MeshFilter>();
+            
+            filter.sharedMesh = mesh;
+
+            var renderer = GetComponent<MeshRenderer>();
+            renderer.material = _mat;
+        }
+
+        List<Vector3> CreateVertices()
+        {
             var vertices = new List<Vector3>();
             for (var i = 0; i <= zSize; i++)
             {
@@ -28,9 +42,12 @@ namespace ProcedualTerrainGen.Prework
                     vertices.Add(new Vector3(_x, _y, _z)*3f);
                 }
             }
-            mesh.SetVertices(vertices);
 
+            return vertices;
+        }
 
+        List<int> CreateTriangles()
+        {
             var triangles = new List<int>();
             for(var i=0; i<zSize; i++)
             for (var j = 0; j < xSize; j++)
@@ -45,15 +62,8 @@ namespace ProcedualTerrainGen.Prework
                 triangles.Add((calcVertexIndex(i + 1, j + 1)));
                 triangles.Add(calcVertexIndex(i+1,j));
             }
-            mesh.SetTriangles(triangles, 0);
-            
-            mesh.RecalculateNormals();
-            var filter = GetComponent<MeshFilter>();
-            
-            filter.sharedMesh = mesh;
 
-            var renderer = GetComponent<MeshRenderer>();
-            renderer.material = _mat;
+            return triangles;
         }
 
         private void OnDrawGizmos()
