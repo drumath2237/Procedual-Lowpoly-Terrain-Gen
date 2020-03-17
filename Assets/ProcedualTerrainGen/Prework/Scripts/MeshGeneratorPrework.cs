@@ -7,28 +7,81 @@ namespace ProcedualTerrainGen.Prework
     [RequireComponent(typeof(MeshRenderer),typeof(MeshFilter))]
     public class MeshGeneratorPrework : MonoBehaviour
     {
+        [SerializeField] private bool isDrawGizmo=false;
+        
         [SerializeField] private Material _mat;
 
         [SerializeField] private int xSize, zSize;
+
+        [SerializeField] private float _geometryScale;
+        [SerializeField] private float _xOffset, _zOffset;
+        
+        
         
         private void Start()
         {
-            Mesh mesh = new Mesh();
+            UpdateMesh();
+        }
+
+        private void OnValidate()
+        {
+            UpdateMesh();
+        }
+
+        void UpdateMesh()
+        {
+            var mesh = new Mesh();
             
-            List<Vector3> vertices = new List<Vector3>();
+            mesh.SetVertices(CreateVertices(_geometryScale, _xOffset, _zOffset));
+            mesh.SetTriangles(CreateTriangles(), 0);
+            
+            mesh.RecalculateNormals();
+            var filter = GetComponent<MeshFilter>();
+            
+            filter.sharedMesh = mesh;
+
+            var renderer = GetComponent<MeshRenderer>();
+            renderer.material = _mat;
+        }
+
+        List<Vector3> CreateVertices(float geometryScale, float xOffset, float zOffset)
+        {
+            var vertices = new List<Vector3>();
             for (var i = 0; i <= zSize; i++)
             {
                 for (var j = 0; j <= xSize; j++)
                 {
-                    vertices.Add(new Vector3(i- (zSize/2f), 0, j-(xSize/2f)));
+
+                    float Noise(float _xvalue, float _zvalue)
+                    {
+                        return Mathf.PerlinNoise(_xvalue, _zvalue) * 2.0f - 1.0f;
+                    }
+                    
+                    var _x = (i - (zSize / 2f)) * geometryScale;
+                    var _z = (j - (xSize / 2f)) * geometryScale;
+                    
+
+                    var _y =
+                            (
+                            Noise(_x / 100f + xOffset, _z / 100f + zOffset)*50
+                            + Noise(_x/5f+xOffset, _z/5f+zOffset)*3
+                            + Noise(_x+xOffset, _z+zOffset)
+                            )
+                        ;
+
+
+                    vertices.Add(new Vector3(_x, _y, _z)*3f);
                 }
             }
-            mesh.SetVertices(vertices);
 
+            return vertices;
+        }
 
-            List<int> triangles = new List<int>();
-            for(int i=0; i<zSize; i++)
-            for (int j = 0; j < xSize; j++)
+        List<int> CreateTriangles()
+        {
+            var triangles = new List<int>();
+            for(var i=0; i<zSize; i++)
+            for (var j = 0; j < xSize; j++)
             {
                 Func<int, int, int> calcVertexIndex = (_i, _j) => _i * (xSize + 1) + _j;
                 
@@ -40,19 +93,14 @@ namespace ProcedualTerrainGen.Prework
                 triangles.Add((calcVertexIndex(i + 1, j + 1)));
                 triangles.Add(calcVertexIndex(i+1,j));
             }
-            mesh.SetTriangles(triangles, 0);
-            
-            mesh.RecalculateNormals();
-            MeshFilter filter = GetComponent<MeshFilter>();
-            
-            filter.sharedMesh = mesh;
 
-            MeshRenderer renderer = GetComponent<MeshRenderer>();
-            renderer.material = _mat;
+            return triangles;
         }
 
         private void OnDrawGizmos()
         {
+            if (!isDrawGizmo) return;
+            
             Gizmos.color = Color.yellow;
             foreach(var v in GetComponent<MeshFilter>().sharedMesh.vertices)
             {
