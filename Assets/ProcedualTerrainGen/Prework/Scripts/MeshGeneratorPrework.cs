@@ -134,9 +134,9 @@ namespace ProcedualTerrainGen.Prework
 
                     var _y =
                             (
-                            Noise(_x / 100f + xOffset, _z / 100f + zOffset)*47
-                            + Noise(_x/20f+xOffset, _z/20f+zOffset)
-                            + Noise(_x+xOffset, _z+zOffset)*5
+                            Noise(_x / 100f + xOffset, _z / 100f + zOffset)*45
+                            + Noise(_x/20f+xOffset, _z/20f+zOffset)*1.5f
+                            + Noise(_x+xOffset, _z+zOffset)*3.5f
                             )
                         ;
 
